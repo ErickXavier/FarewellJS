@@ -261,14 +261,21 @@ class DHTMLjs {
 
   // Load external HTML templates
   loadExternalTemplates() {
-    const links = document.querySelectorAll('link[rel="import"]');
-    links.forEach(link => {
-      const url = link.href;
+    const externaTemplates = document.querySelectorAll('template[set]');
+    externaTemplates.forEach(template => {
+      const url = template.set;
       fetch(url)
         .then(response => response.text())
         .then(html => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
+
+          // add the loaded content to the proper template in html
+          const templateId = template.id;
+          const targetTemplate = document.querySelector(`template#${templateId}`);
+          targetTemplate.innerHTML = doc.body.innerHTML;
+
+          // Add the template to the map
           doc.querySelectorAll('template').forEach(template => {
             this.templates.set(template.id, {content: template.innerHTML, variableName: template.getAttribute('[set]')});
           });

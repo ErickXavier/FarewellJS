@@ -1,6 +1,6 @@
-# DHTML.js Library
+# NoJS Library
 
-DHTML.js is a robust and comprehensive library designed to simplify web development by providing a declarative and intuitive syntax for common programming patterns. This library encompasses various facets of modern web development, making it a one-stop solution for developers.
+NoJS is a robust and comprehensive library designed to simplify web development by providing a declarative and intuitive syntax for common programming patterns. This library encompasses various facets of modern web development, making it a one-stop solution for developers.
 
 1. **Conditionals**: It offers conditional rendering for HTML elements, allowing elements to be shown or hidden based on specific variables.
 2. **Loops**: Facilitates the creation of repeated elements from a list of items, streamlining list rendering.
@@ -17,7 +17,7 @@ DHTML.js is a robust and comprehensive library designed to simplify web developm
 13. **State Management**: Efficiently manages the application's state, ensuring a smooth user experience.
 14. **Web Components Compatibility**: Ensures compatibility with web components, further extending the library's applicability.
 
-With its wide array of features, DHTML.js streamlines development, enabling rapid and efficient creation of interactive and dynamic web applications.
+With its wide array of features, NoJS streamlines development, enabling rapid and efficient creation of interactive and dynamic web applications.
 
 ## Table of Contents
 

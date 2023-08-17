@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="import" href="en-US.json">
+  <link rel="import" href="template.html">
   <title>Document</title>
   <script>
     // conditions
@@ -169,6 +169,11 @@
     </div>
   </fieldset>
 
-  <script src="dhtml.js"></script>
+  <fieldset>
+    <legend>14. External Templates</legend>
+      <template [set]="template.html"></template>
+    </fieldset>
+
+  <script src="no.js"></script>
 </body>
 </html>
