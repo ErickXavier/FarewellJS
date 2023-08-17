@@ -558,7 +558,7 @@ class DHTMLjs {
     const userLang = navigator.language || navigator.userLanguage;
 
     // Find elements with the translate directive for specific language
-    const elementsWithSpecificLangTranslation = root.querySelectorAll(`[translate.${userLang}]`);
+    const elementsWithSpecificLangTranslation = root.querySelectorAll(`[translate\\.${userLang}]`);
     elementsWithSpecificLangTranslation.forEach(element => {
       const translationKey = element.getAttribute(`[translate.${userLang}]`);
       const translation = this.translations[userLang] && this.translations[userLang][translationKey];
@@ -689,4 +689,4 @@ class DHTMLjs {
 
 // Usage:
 const dhtml = new DHTMLjs();
-dhtml.init();
+document.onload = dhtml.init();
