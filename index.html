@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script>
+    // conditions
+    var condition1 = true;
+    var condition2 = false;
+    var condition3 = false;
+
+    // loops
+    var menuList = [
+      {label: 'Home', link: '/'},
+      {label: 'About', link: '/about'},
+      {label: 'Contact', link: '/contact'},
+    ];
+
+    // template handling
+    var user = {
+      name: 'John'
+    };
+
+    // dynamic css classes
+    var userStatusClass = 'active';
+
+    // dynamic css styles
+    var userStatusStyle = 'display: block';
+
+    // switch case logic
+    var userRole = 'admin';
+
+  </script>
+  <script src="dhtml.js"></script>
+</head>
+<body>
+  <fieldset>
+    <legend>1.1 First conditionas example:</legend>
+    <div [if]="condition1" [then]="#ifthenTemplate"></div>
+    <div [elseif]="condition2" [then]="#elseifthenTemplate"></div>
+    <div [elseif]="condition3" [else]="#elseTemplate">
+      Content if condition3 is true
+    </div>
+    <template id="ifthenTemplate">
+      Content if condition1 is true
+    </template>
+    <template id="elseifthenTemplate">
+      Content if condition2 is true
+    </template>
+    <template id="elseTemplate">
+      Content if all conditions are false
+    </template>
+  </fieldset>
+
+  <fieldset>
+    <legend>1.2 Second conditionas example:</legend>
+    <div [if]="condition1" [then]="#anotherifthenTemplate" [else]="#anotherElseTemplate"></div>
+    <template id="anotherifthenTemplate">
+      Content if condition1 is true
+    </template>
+    <template id="anotherElseTemplate">
+      Content if condition1 is false
+    </template>
+  </fieldset>
+
+  <fieldset>
+    <legend>2. Loops</legend>
+    <ul>
+      <li [foreach]="menuItem" [from]="menuList" [else]="#noItems" [index]="idx">
+        <a [href]="menuItem.link">{idx} - {menuItem.label}</a>
+      </li>
+    </ul>
+    <template id="noItems">
+      There are no items
+    </template>
+  </fieldset>
+
+  <fieldset>
+    <legend>3. Fetch API</legend>
+    <form [endpoint]="https://httpstat.us/200" [method]="post" [success]="#postSuccess" [error]="#postError">
+      <input type="text" name="user"/>
+      <input type="text" name="password"/>
+      <button type="submit">Login</button>
+    </form>
+    <template id="postSuccess" [set]="resultObj">
+      User {resultObj.userName} is logged in
+    </template>
+    <template id="postError" [set]="errorObj">
+      {errorObj.code} {result.message}
+    </template>
+  </fieldset>
+
+  <fieldset>
+    <legend>4. Template handling</legend>
+    <div [template]="loggedOfUserTemplate"></div>
+    <template id="loggedOfUserTemplate" [set]="user">
+      User {user.name} is not logged in
+    </template>
+  </fieldset>
+
+  <fieldset>
+    <legend>5. Dynamic CSS Classes</legend>
+    <!-- Using a string variable -->
+    <div [class]="userStatusClass"></div>
+
+    <!-- Using an object mapping class names to conditions -->
+    <div [class]="{ active: isActive, hidden: isHidden }"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>6. Dynamic CSS Styles</legend>
+    <!-- Using a string variable -->
+    <div [style]="userStatusStyle"></div>
+
+    <!-- Using an object mapping style names to values -->
+    <div [styles]="{isActive: {display: 'block'}, isHidden: {display: 'flex'}}"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>7. Switch Case Logic</legend>
+    <div [switch]="userRole">
+      <div [case]="'admin'">Admin Panel</div>
+      <div [case]="'user'">User Dashboard</div>
+      <div [default]>Guest</div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>8. DOM Actions</legend>
+    <a [call]="/logout" [success]="#userLoggedOut" [error]="#errorMessage">Logout</a>
+    <template id="userLoggedOut" [set]="result">
+      {result.message}
+    </template>
+    <template id="errorMessage" [set]="error">
+      {error.message}
+    </template>
+  </fieldset>
+
+  <fieldset>
+    <legend>9. DOM Events</legend>
+    <button [click]="handleClick">Click me</button>
+  </fieldset>
+
+  <fieldset>
+    <legend>10. Custom Directives</legend>
+    <div [customDirective]="value">Custom Content</div>
+  </fieldset>
+
+  <fieldset>
+    <legend>11. Animations and Transitions</legend>
+    <div [animate]="fadeIn" [duration]="2s">Animated Content</div>
+  </fieldset>
+
+  <fieldset>
+    <legend>12. Form Validation</legend>
+    <input type="text" name="email" [validate]="email" [error]="#emailError"/>
+    <template id="emailError">Invalid Email</template>
+
+    <input type="text" name="phone" [validate]="phone" [format]="^\d{3}-\d{3}-\d{4}$" [error]="#phoneError"/>
+    <template id="phoneError">Invalid Phone Number</template>
+  </fieldset>
+
+  <fieldset>
+    <legend>13. Localization and Translations</legend>
+    <div [translate.en-US]="welcomeMessage"></div>
+    <div [translations]="en-US.json" [lang]="en-US">
+      <div [translate]="welcomeMessage"></div>
+    </div>
+  </fieldset>
+
+</body>
+</html>
