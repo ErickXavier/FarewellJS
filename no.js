@@ -1,3 +1,19 @@
+// Example of registering a custom directive
+// dhtml.registerDirective('customDirective', (element, value) => {
+//   element.innerHTML = `Custom Content: ${value}`;
+// });
+
+// Example of setting translations
+// dhtml.setTranslations('en-us', {welcomeMessage: 'Welcome!'});
+// dhtml.setTranslations('pt-br', {welcomeMessage: 'Bem-vindo!'});
+
+// Example of updating state
+// dhtml.stateManager.setState('userProfile.name', 'Tony Stark');
+
+// Usage:
+// const dhtml = new DHTMLjs();
+// document.onload = dhtml.init();
+
 class StateManager {
   constructor() {
     this.state = {};
@@ -26,12 +42,14 @@ class StateManager {
   }
 }
 
-class DHTMLjs {
-  constructor() {
+(function () {
+  function NoJS() {
+
+    const root = document;
 
     // A map to hold templates
     this.templates = new Map();
-    this.loadExternalTemplates();
+    this._loadExternalTemplates();
     document.querySelectorAll('template').forEach(template => {
       this.templates.set(template.id, {content: template.innerHTML, variableName: template.getAttribute('[set]')});
     });
@@ -48,24 +66,27 @@ class DHTMLjs {
 
     // Web Components registry
     this.webComponents = new Map();
+
+    this.init(root);
   }
 
   // Conditional rendering
-  handleConditionals(root) {
+  NoJS.prototype._handleConditionals = function(root) {
+    var this_ = this;
     const conditionalGroups = root.querySelectorAll('[if]');
 
     conditionalGroups.forEach(ifElement => {
       let conditionMet = false;
 
       // Evaluate the condition using a safe method instead of directly accessing window object
-      const ifCondition = this.evaluateCondition(ifElement.getAttribute('[if]'));
+      const ifCondition = this_.evaluateCondition(ifElement.getAttribute('[if]'));
       const thenTemplateId = ifElement.getAttribute('[then]');
       const elseTemplateId = ifElement.getAttribute('[else]');
       if (ifCondition && thenTemplateId) {
-        this.handleTemplateWithResult(thenTemplateId, {condition: ifCondition});
+        this_._handleTemplateWithResult(thenTemplateId, {condition: ifCondition});
         conditionMet = true;
       } else if (elseTemplateId) {
-        this.handleTemplateWithResult(elseTemplateId, {condition: ifCondition});
+        this_._handleTemplateWithResult(elseTemplateId, {condition: ifCondition});
       }
 
       // Handle [elseif] conditions
@@ -75,14 +96,14 @@ class DHTMLjs {
           sibling.style.display = 'none';
         } else {
           // Evaluate the condition using a safe method
-          const elseifCondition = this.evaluateCondition(sibling.getAttribute('[elseif]'));
+          const elseifCondition = this_.evaluateCondition(sibling.getAttribute('[elseif]'));
           const elseifThenTemplateId = sibling.getAttribute('[then]');
           const elseifElseTemplateId = sibling.getAttribute('[else]');
           if (elseifCondition && elseifThenTemplateId) {
-            this.handleTemplateWithResult(elseifThenTemplateId, {condition: elseifCondition});
+            this_._handleTemplateWithResult(elseifThenTemplateId, {condition: elseifCondition});
             conditionMet = true;
           } else if (elseifElseTemplateId) {
-            this.handleTemplateWithResult(elseifElseTemplateId, {condition: elseifCondition});
+            this_._handleTemplateWithResult(elseifElseTemplateId, {condition: elseifCondition});
           } else {
             sibling.style.display = 'none';
           }
@@ -93,14 +114,15 @@ class DHTMLjs {
       // Handle final [else] condition
       if (sibling && sibling.hasAttribute('[else]') && !conditionMet) {
         const finalElseTemplateId = sibling.getAttribute('[else]');
-        this.handleTemplateWithResult(finalElseTemplateId, {condition: false});
+        this_._handleTemplateWithResult(finalElseTemplateId, {condition: false});
         sibling.style.display = 'block';
       }
     });
   }
 
   // Evaluate the condition using a safe method instead of directly accessing window object
-  evaluateCondition(expression) {
+  NoJS.prototype._evaluateCondition = function(expression) {
+    var this_ = this;
     // Check if the expression is defined and is not an empty string
     if (expression && typeof expression === 'string') {
       try {
@@ -108,7 +130,7 @@ class DHTMLjs {
         // You can use a function that evaluates the expression according to your specific rules
         // In this example, we first try to get the value of the expression from the stateManager
         // If that fails, we try to get the value of the expression from the window object
-        return this.stateManager.getState(expression) || window[expression];
+        return this_.stateManager.getState(expression) || window[expression];
       } catch (error) {
         // If an error occurs during evaluation, you can handle it here
         console.error('Erro ao avaliar a condição:', expression, error);
@@ -118,12 +140,13 @@ class DHTMLjs {
   }
 
   // Evaluate the expression using a safe method instead of directly accessing window object
-  evaluateExpression(expression) {
+  NoJS.prototype._evaluateExpression = function(expression) {
+    var this_ = this;
     // Check if the expression is defined and is not an empty string
     if (expression && typeof expression === 'string') {
       try {
         // First, try to get the value of the expression from the stateManager
-        const valueFromState = this.stateManager.getState(expression);
+        const valueFromState = this_.stateManager.getState(expression);
         if (valueFromState !== undefined) {
           return valueFromState;
         }
@@ -142,12 +165,13 @@ class DHTMLjs {
   }
 
   // Loop rendering
-  handleLoops(root) {
+  NoJS.prototype._handleLoops = function(root) {
+    var this_ = this;
     const loopElements = root.querySelectorAll('[foreach]');
 
     loopElements.forEach(element => {
       const itemVariable = element.getAttribute('[foreach]');
-      const fromList = this.evaluateExpression(element.getAttribute('[from]'));
+      const fromList = this_.evaluateExpression(element.getAttribute('[from]'));
       const elseTemplateId = element.getAttribute('[else]');
       const indexVariable = element.getAttribute('[index]');
 
@@ -176,7 +200,7 @@ class DHTMLjs {
           if (indexVariable) result[indexVariable] = idx;
 
           // Apply template with result
-          this.handleTemplateWithResult(itemElement, itemElement.outerHTML, result);
+          this_._handleTemplateWithResult(itemElement, itemElement.outerHTML, result);
 
           // Append the new element to the fragment
           fragment.appendChild(itemElement);
@@ -189,13 +213,14 @@ class DHTMLjs {
         element.style.display = 'none';
       } else if (elseTemplateId) {
         // Apply the 'else' template if the list is empty
-        this.handleTemplateWithResult(elseTemplateId, {condition: false});
+        this_._handleTemplateWithResult(elseTemplateId, {condition: false});
       }
     });
   }
 
   // Communication with Restful APIs
-  handleApiCommunication(root) {
+  NoJS.prototype._handleApiCommunication = function(root) {
+    var this_ = this;
     const formElements = root.querySelectorAll('form[endpoint]');
 
     formElements.forEach(form => {
@@ -217,12 +242,12 @@ class DHTMLjs {
           .then(response => response.json())
           .then(result => {
             if (successStateKey) {
-              this.stateManager.setState(successStateKey, result);
+              this_.stateManager.setState(successStateKey, result);
             }
           })
           .catch(error => {
             if (errorStateKey) {
-              this.stateManager.setState(errorStateKey, error);
+              this_.stateManager.setState(errorStateKey, error);
             }
           });
       });
@@ -230,20 +255,22 @@ class DHTMLjs {
   }
 
   // Template handling
-  handleTemplates(root) {
+  NoJS.prototype._handleTemplates = function(root) {
+    var this_ = this;
     const templateElements = root.querySelectorAll('[template]');
 
     templateElements.forEach(element => {
       const templateId = element.getAttribute('[template]');
-      this.handleTemplateWithResult(templateId, {});
+      this_._handleTemplateWithResult(templateId, {});
     });
   }
 
   // Apply the specified template with result
-  handleTemplateWithResult(templateId, result, root) {
+  NoJS.prototype._handleTemplateWithResult = function(templateId, result, root) {
+    var this_ = this;
     const targetElement = root.querySelector(templateId);
     if (targetElement) {
-      const templateDetails = this.templates.get(templateId.replace('#', ''));
+      const templateDetails = this_.templates.get(templateId.replace('#', ''));
       const variableName = templateDetails.variableName || 'result';
       let templateContent = templateDetails.content;
 
@@ -260,7 +287,8 @@ class DHTMLjs {
   }
 
   // Load external HTML templates
-  loadExternalTemplates() {
+  NoJS.prototype._loadExternalTemplates = function() {
+    var this_ = this;
     const externaTemplates = document.querySelectorAll('template[set]');
     externaTemplates.forEach(template => {
       const url = template.set;
@@ -277,25 +305,27 @@ class DHTMLjs {
 
           // Add the template to the map
           doc.querySelectorAll('template').forEach(template => {
-            this.templates.set(template.id, {content: template.innerHTML, variableName: template.getAttribute('[set]')});
+            this_.templates.set(template.id, {content: template.innerHTML, variableName: template.getAttribute('[set]')});
           });
         });
     });
   }
 
   // Dynamic class handling
-  handleDynamicClasses(root) {
+  NoJS.prototype._handleDynamicClasses = function(root) {
+    var this_ = this;
     const elementsWithDynamicClasses = root.querySelectorAll('[class]');
 
     elementsWithDynamicClasses.forEach(element => {
       const classExpression = element.getAttribute('[class]');
-      const classes = this.evaluateClassExpression(classExpression);
+      const classes = this_.evaluateClassExpression(classExpression);
       element.className = classes.join(' ').trim();
     });
   }
 
   // Evaluate the class expression to determine the classes to apply
-  evaluateClassExpression(expression) {
+  NoJS.prototype._evaluateClassExpression = function(expression) {
+    var this_ = this;
     let classes = [];
     try {
       const evaluatedExpression = JSON.parse(expression);
@@ -315,22 +345,24 @@ class DHTMLjs {
   }
 
   // Dynamic styles handling
-  handleDynamicStyles(root) {
+  NoJS.prototype._handleDynamicStyles = function(root) {
+    var this_ = this;
     const elementsWithDynamicStyles = root.querySelectorAll('[styles]');
 
     elementsWithDynamicStyles.forEach(element => {
       const stylesExpression = element.getAttribute('[styles]');
-      this.evaluateStylesExpression(element, stylesExpression);
+      this_.evaluateStylesExpression(element, stylesExpression);
     });
   }
 
   // Evaluate the styles expression to apply styles to the element
-  evaluateStylesExpression(element, expression) {
+  NoJS.prototype._evaluateStylesExpression = function(element, expression) {
+    var this_ = this;
     try {
       const evaluatedExpression = JSON.parse(expression);
       if (typeof evaluatedExpression === 'object') {
         for (const [conditionName, styles] of Object.entries(evaluatedExpression)) {
-          const conditionValue = this.stateManager.getState(conditionName) || window[conditionName];
+          const conditionValue = this_.stateManager.getState(conditionName) || window[conditionName];
           if (conditionValue) {
             Object.assign(element.style, styles);
           } else {
@@ -346,7 +378,8 @@ class DHTMLjs {
   }
 
   // Switch Case Logic
-  handleSwitchCases(root) {
+  NoJS.prototype._handleSwitchCases = function(root) {
+    var this_ = this;
     const switchElements = root.querySelectorAll('[switch]');
 
     switchElements.forEach(switchElement => {
@@ -378,7 +411,8 @@ class DHTMLjs {
   }
 
   // Call Actions from Other DOM Elements
-  handleCallActions(root) {
+  NoJS.prototype._handleCallActions = function(root) {
+    var this_ = this;
     const callElements = root.querySelectorAll('[call]');
 
     callElements.forEach(element => {
@@ -396,13 +430,13 @@ class DHTMLjs {
           .then(result => {
             // Apply the success template if defined
             if (successTemplateId) {
-              this.handleTemplateWithResult(successTemplateId, {result});
+              this_._handleTemplateWithResult(successTemplateId, {result});
             }
           })
           .catch(error => {
             // Apply the error template if defined
             if (errorTemplateId) {
-              this.handleTemplateWithResult(errorTemplateId, {error});
+              this_._handleTemplateWithResult(errorTemplateId, {error});
             }
           });
       });
@@ -410,13 +444,14 @@ class DHTMLjs {
   }
 
   // Event handling
-  handleEventHandlers(root) {
+  NoJS.prototype._handleEventHandlers = function(root) {
+    var this_ = this;
     const events = ['click', 'change', 'keyup', 'mouseover', 'mouseout', 'focus', 'blur'];
     events.forEach(eventType => {
       const elementsWithEvent = root.querySelectorAll(`[${eventType}]`);
       elementsWithEvent.forEach(element => {
         const handlerExpression = element.getAttribute(`[${eventType}]`);
-        const handlerFunction = this.stateManager.getState(handlerExpression);
+        const handlerFunction = this_.stateManager.getState(handlerExpression);
         if (typeof handlerFunction === 'function') {
           element.addEventListener(eventType, handlerFunction);
         }
@@ -425,12 +460,13 @@ class DHTMLjs {
   }
 
   // Custom Filters and Directives
-  handleCustomDirectives(root) {
-    for (const directiveName in this.directives) {
+  NoJS.prototype._handleCustomDirectives = function(root) {
+    var this_ = this;
+    for (const directiveName in this_.directives) {
       const elementsWithDirective = root.querySelectorAll(`[${directiveName}]`);
       elementsWithDirective.forEach(element => {
         const directiveValue = element.getAttribute(`[${directiveName}]`);
-        const directiveFunction = this.directives[directiveName];
+        const directiveFunction = this_.directives[directiveName];
         if (typeof directiveFunction === 'function') {
           directiveFunction(element, directiveValue);
         }
@@ -439,17 +475,20 @@ class DHTMLjs {
   }
 
   // Register a custom filter
-  registerFilter(name, filterFunction) {
-    this.filters[name] = filterFunction;
+  NoJS.prototype.registerFilter = function(name, filterFunction) {
+    var this_ = this;
+    this_.filters[name] = filterFunction;
   }
 
   // Register a custom directive
-  registerDirective(name, directiveFunction) {
-    this.directives[name] = directiveFunction;
+  NoJS.prototype.registerDirective = function(name, directiveFunction) {
+    var this_ = this;
+    this_.directives[name] = directiveFunction;
   }
 
   // Animations and Transitions
-  handleAnimationsAndTransitions(root) {
+  NoJS.prototype._handleAnimationsAndTransitions = function(root) {
+    var this_ = this;
     const elementsWithAnimation = root.querySelectorAll('[animate]');
 
     elementsWithAnimation.forEach(element => {
@@ -465,7 +504,8 @@ class DHTMLjs {
   }
 
   // Form validation handling
-  handleFormValidation(root) {
+  NoJS.prototype._handleFormValidation = function(root) {
+    var this_ = this;
     const formElements = root.querySelectorAll('form');
 
     formElements.forEach(form => {
@@ -479,10 +519,10 @@ class DHTMLjs {
           const value = input.value;
 
           // Perform the validation based on the type
-          if (!this.validateInput(validationType, value)) {
+          if (!this_.validateInput(validationType, value)) {
             isValid = false;
             if (errorTemplateId) {
-              this.handleTemplateWithResult(errorTemplateId, {error: `Invalid ${validationType}`});
+              this_._handleTemplateWithResult(errorTemplateId, {error: `Invalid ${validationType}`});
             }
           }
         });
@@ -495,7 +535,8 @@ class DHTMLjs {
   }
 
   // Validate the input based on the validation type
-  validateInput(type, value, format) {
+  NoJS.prototype._validateInput = function(type, value, format) {
+    var this_ = this;
     switch (type) {
       case 'email':
         const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -537,22 +578,25 @@ class DHTMLjs {
   }
 
   // Set translations for a specific language
-  setTranslations(lang, translations) {
-    this.stateManager.setState(`translations.${lang}`, translations);
+  NoJS.prototype._setTranslations = function(lang, translations) {
+    var this_ = this;
+    this_.stateManager.setState(`translations.${lang}`, translations);
   }
 
   // Get translation for a specific key and language
-  getTranslation(lang, key) {
-    return this.stateManager.getState(`translations.${lang}.${key}`);
+  NoJS.prototype._getTranslation = function(lang, key) {
+    var this_ = this;
+    return this_.stateManager.getState(`translations.${lang}.${key}`);
   }
 
   // Load translations from a JSON file
-  loadTranslations(url, lang) {
+  NoJS.prototype._loadTranslations = function(url, lang) {
+    var this_ = this;
     fetch(url)
       .then(response => response.json())
       .then(translations => {
-        this.translations[lang] = translations;
-        this.handleTranslations(); // Reapply translations after loading
+        this_.translations[lang] = translations;
+        this_._handleTranslations(); // Reapply translations after loading
       })
       .catch(error => {
         console.error('Error loading translations:', error);
@@ -560,7 +604,8 @@ class DHTMLjs {
   }
 
   // Apply translations based on user's language
-  handleTranslations(root) {
+  NoJS.prototype._handleTranslations = function(root) {
+    var this_ = this;
     // Determine user's language (you can use more sophisticated logic here)
     const userLang = navigator.language || navigator.userLanguage;
 
@@ -568,7 +613,7 @@ class DHTMLjs {
     const elementsWithSpecificLangTranslation = root.querySelectorAll(`[translate\\.${userLang}]`);
     elementsWithSpecificLangTranslation.forEach(element => {
       const translationKey = element.getAttribute(`[translate.${userLang}]`);
-      const translation = this.translations[userLang] && this.translations[userLang][translationKey];
+      const translation = this_.translations[userLang] && this_.translations[userLang][translationKey];
       if (translation) {
         element.textContent = translation;
       }
@@ -581,7 +626,7 @@ class DHTMLjs {
       if (parentWithLang) {
         const lang = parentWithLang.getAttribute('[lang]');
         const translationKey = element.getAttribute('[translate]');
-        const translation = this.translations[lang] && this.translations[lang][translationKey];
+        const translation = this_.translations[lang] && this_.translations[lang][translationKey];
         if (translation) {
           element.textContent = translation;
         }
@@ -590,7 +635,8 @@ class DHTMLjs {
   }
 
   // Apply translation files
-  handleTranslationFiles(root) {
+  NoJS.prototype._handleTranslationFiles = function(root) {
+    var this_ = this;
     const elementsWithTranslationFile = root.querySelectorAll('[translations]');
 
     elementsWithTranslationFile.forEach(element => {
@@ -598,18 +644,19 @@ class DHTMLjs {
       const lang = element.getAttribute('[lang]');
 
       if (url && lang) {
-        this.loadTranslations(url, lang);
+        this_.loadTranslations(url, lang);
       }
     });
   }
 
   // State Management
-  handleStateBindings(root) {
+  NoJS.prototype._handleStateBindings = function(root) {
+    var this_ = this;
     const elementsWithStateBinding = root.querySelectorAll('[bind]');
 
     elementsWithStateBinding.forEach(element => {
       const stateKey = element.getAttribute('[bind]');
-      const stateValue = this.stateManager.getState(stateKey);
+      const stateValue = this_.stateManager.getState(stateKey);
 
       // Update element content with state value
       if (stateValue !== undefined) {
@@ -617,7 +664,7 @@ class DHTMLjs {
       }
 
       // Subscribe to changes in state
-      this.stateManager.subscribe((key, value) => {
+      this_.stateManager.subscribe((key, value) => {
         if (key === stateKey) {
           element.textContent = value;
         }
@@ -626,7 +673,8 @@ class DHTMLjs {
   }
 
   // Web Components Compatibility
-  handleWebComponents() {
+  NoJS.prototype._handleWebComponents = function() {
+    var this_ = this;
     // Listen for custom elements being defined
     window.addEventListener('WebComponentsReady', () => {
       customElements.whenDefined('custom-element').then(() => {
@@ -634,7 +682,7 @@ class DHTMLjs {
         customElements.forEach(customElement => {
           const shadowRoot = customElement.shadowRoot;
           if (shadowRoot) {
-            this.handleAll(shadowRoot);
+            this_._handleAll(shadowRoot);
           }
         });
       });
@@ -642,10 +690,11 @@ class DHTMLjs {
   }
 
   // using variables
-  handleTemplateWithVariables(templateId, result, root) {
+  NoJS.prototype._handleTemplateWithVariables = function(templateId, result, root) {
+    var this_ = this;
     const targetElement = root.querySelector(templateId);
     if (targetElement) {
-      const templateDetails = this.templates.get(templateId.replace('#', ''));
+      const templateDetails = this_.templates.get(templateId.replace('#', ''));
       const variableName = templateDetails.variableName || 'result';
       let templateContent = templateDetails.content;
 
@@ -657,43 +706,32 @@ class DHTMLjs {
     }
   }
 
-  handleAll(root = document) {
-    this.handleConditionals(root);
-    this.handleLoops(root);
-    this.handleTemplates(root);
-    this.handleDynamicClasses(root);
-    this.handleDynamicStyles(root);
-    this.handleSwitchCases(root);
-    this.handleCallActions(root);
-    this.handleEventHandlers(root);
-    this.handleCustomDirectives(root);
-    this.handleAnimationsAndTransitions(root);
-    this.handleFormValidation(root);
-    this.handleTranslations(root);
-    this.handleTranslationFiles(root);
-    this.handleStateBindings(root);
+  NoJS.prototype._handleAll = function(root) {
+    var this_ = this;
+    this_._handleConditionals(root);
+    this_._handleLoops(root);
+    this_._handleTemplates(root);
+    this_._handleDynamicClasses(root);
+    this_._handleDynamicStyles(root);
+    this_._handleSwitchCases(root);
+    this_._handleCallActions(root);
+    this_._handleEventHandlers(root);
+    this_._handleCustomDirectives(root);
+    this_._handleAnimationsAndTransitions(root);
+    this_._handleFormValidation(root);
+    this_._handleTranslations(root);
+    this_._handleTranslationFiles(root);
+    this_._handleStateBindings(root);
   }
 
   // General method to parse and render
-  init() {
-    this.handleAll();
-    this.handleWebComponents();
+  NoJS.prototype.init = function(root) {
+    var this_ = this;
+    this_._handleAll(root);
+    this_._handleWebComponents();
   }
 
-}
-
-// Example of registering a custom directive
-// dhtml.registerDirective('customDirective', (element, value) => {
-//   element.innerHTML = `Custom Content: ${value}`;
-// });
-
-// Example of setting translations
-// dhtml.setTranslations('en-us', {welcomeMessage: 'Welcome!'});
-// dhtml.setTranslations('pt-br', {welcomeMessage: 'Bem-vindo!'});
-
-// Example of updating state
-// dhtml.stateManager.setState('userProfile.name', 'Tony Stark');
-
-// Usage:
-const dhtml = new DHTMLjs();
-document.onload = dhtml.init();
+  document.addEventListener('DOMContentLoaded', function () {
+    window.nojs = new NoJS();
+  })
+})();
