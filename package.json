@@ -1,0 +1,24 @@
+{
+  "name": "farewelljs",
+  "version": "0.0.2",
+  "description": "FarewellJS is a robust and comprehensive library designed to simplify web development by providing a declarative and intuitive syntax for common programming patterns. This library encompasses various facets of modern web development, making it a one-stop solution for developers.",
+  "main": "farewell.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ErickXavier/FarewellJS.git"
+  },
+  "keywords": [
+    "farewell",
+    "farewelljs",
+    "nojs"
+  ],
+  "author": "ErickXavier",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/ErickXavier/FarewellJS/issues"
+  },
+  "homepage": "https://github.com/ErickXavier/FarewellJS#readme"
+}

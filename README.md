@@ -1,5 +1,7 @@
 # FarewellJS Library
 
+Status: **In Development | Nothing is Working yet**
+
 FarewellJS is a robust and comprehensive library designed to simplify web development by providing a declarative and intuitive syntax for common programming patterns. This library encompasses various facets of modern web development, making it a one-stop solution for developers.
 
 1. **Conditionals**: It offers conditional rendering for HTML elements, allowing elements to be shown or hidden based on specific variables.
