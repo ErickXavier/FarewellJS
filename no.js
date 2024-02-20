@@ -15,7 +15,7 @@
 // const dhtml = new DHTMLjs();
 // document.onload = dhtml.init();
 
-function Farerwell () {
+function NoJS () {
 
   class StateManager {
     constructor() {
@@ -739,4 +739,4 @@ function Farerwell () {
   document.addEventListener('DOMContentLoaded', () => window.nojs = new NoJS());
 };
 
-module.exports = Farerwell;
+module.exports = NoJS;
